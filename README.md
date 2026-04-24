@@ -90,6 +90,16 @@ npm run build      # compile TypeScript
 npm start          # production (compiled JS)
 ```
 
+### 6. Start the frontend
+
+```bash
+cd frontend
+npm install
+npm run dev        # Vite dev server on http://localhost:5173
+```
+
+The frontend proxies all `/api` calls to the Express backend on port 3000, so both need to be running.
+
 ---
 
 ## Demo path (3-minute demo)

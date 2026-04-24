@@ -4,3 +4,5 @@ dist/
 .env 
 *.js.map
 *.d.ts.map
+frontend/node_modules/
+frontend/dist/
