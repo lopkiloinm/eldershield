@@ -40,7 +40,6 @@ export const config = {
   nexlaSessionToken: require_env("NEXLA_SESSION_TOKEN"),
   nexlaInboxNexsetId: require_env("NEXLA_INBOX_NEXSET_ID"),
   nexlaApiBase: optional_env("NEXLA_API_URL", "https://dataops.nexla.io/nexla-api"),
-  nexlaGenAiBase: "https://api-genai.nexla.io/v1",
   // Slack channel ID to sweep (used as fallback label in logs)
   nexlaSlackChannelId: optional_env("NEXLA_SLACK_CHANNEL_ID", ""),
 
@@ -62,7 +61,24 @@ export const config = {
   //   -e OPENAI_API_KEY=$OPENAI_API_KEY -e REDIS_URL=$REDIS_URL \
   //   -p 8000:8000 redis/agent-memory-server:latest
   agentMemoryUrl: optional_env("AGENT_MEMORY_URL", "http://localhost:8000"),
-  agentMemoryToken: optional_env("AGENT_MEMORY_TOKEN", ""), // set DISABLE_AUTH=true on server for dev
+  agentMemoryToken: optional_env("AGENT_MEMORY_TOKEN", ""),
+
+  // Senso context layer — makes cited.md discoverable + monetizable by AI agents
+  sensoApiKey: optional_env("SENSO_API_KEY", ""),
+  sensoApiBase: optional_env("SENSO_API_BASE", "https://api.senso.ai"),
+  sensoCitedMdUrl: optional_env(
+    "SENSO_CITED_MD_URL",
+    "https://raw.githubusercontent.com/lopkiloinm/eldershield/main/cited.md"
+  ),
+
+  // Vapi voice AI
+  vapiWebhookSecret: optional_env("VAPI_WEBHOOK_SECRET", ""),
+  vapiApiKey: optional_env("VAPI_API_KEY", ""),
+  publicUrl: optional_env("PUBLIC_URL", "http://localhost:3000"),
+
+  // Autonomous worker loop
+  autonomousMode: optional_env("AUTONOMOUS_MODE", "false") === "true",
+  workerPollMs: parseInt(optional_env("WORKER_POLL_MS", "15000"), 10),
 } as const;
 
 export type Config = typeof config;

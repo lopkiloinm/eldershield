@@ -130,12 +130,20 @@ workerRouter.post("/scan-next", async (_req: Request, res: Response): Promise<vo
       ]
     );
 
-    // ── 7. Publish to cited.md via GitHub ────────────────────────────────────
+    // ── 7. Publish to cited.md via GitHub + notify Senso ─────────────────────
     const mdEntry = buildMarkdownEntry(scanJob, pageAnalysis, classification, memoryContext);
     try {
       await appendToCitedMd(mdEntry);
+      // Notify Senso that cited.md has new content — makes it discoverable + monetizable
+      const { notifySenso } = await import("../sensoClient");
+      await notifySenso({
+        url: scanJob.url,
+        risk: classification.risk,
+        explanation: classification.explanation,
+        jobId: scanJob.jobId,
+      });
     } catch (ghErr: unknown) {
-      console.error(`[worker] GitHub cited.md update failed (non-fatal): ${String(ghErr)}`);
+      console.error(`[worker] GitHub/Senso update failed (non-fatal): ${String(ghErr)}`);
     }
 
     // ── 8. Mark job complete ─────────────────────────────────────────────────

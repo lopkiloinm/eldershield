@@ -52,13 +52,34 @@ Required env vars:
 | `DATABASE_URL` | Ghost-managed Postgres connection string |
 | `REDIS_URL` | Redis connection string (or use `REDIS_HOST`/`REDIS_PORT`) |
 | `TINYFISH_API_KEY` | TinyFish API key |
-| `NEXLA_SERVICE_KEY` | Nexla service key |
-| `NEXLA_INBOX_NEXSET_ID` | Nexla Nexset ID for inbox messages |
+| `NEXLA_SESSION_TOKEN` | Nexla session token (copy from dataops.nexla.io) |
+| `NEXLA_INBOX_NEXSET_ID` | Nexla Nexset ID for Slack inbox messages |
 | `GITHUB_OWNER` | GitHub username or org |
 | `GITHUB_REPO` | GitHub repo name |
 | `GITHUB_TOKEN` | GitHub personal access token (needs `contents: write`) |
 
-### 3. Run database migrations
+### 3. Create a Ghost.build database
+
+Ghost.build provides the agent-native Postgres DB. Install the CLI and create a database:
+
+```bash
+# Install Ghost CLI
+curl -fsSL https://install.ghost.build | sh
+
+# Authenticate (opens browser for GitHub OAuth)
+ghost login
+
+# Create the database and capture the connection string
+ghost create --name eldershield --wait --json
+```
+
+Copy the `connection` value from the JSON output and set it in `.env`:
+
+```
+DATABASE_URL=postgresql://tsdbadmin:<password>@<id>.tsdb.cloud.timescale.com:<port>/tsdb
+```
+
+### 4. Run database migrations
 
 ```bash
 npm run db:migrate

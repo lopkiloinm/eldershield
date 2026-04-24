@@ -1,0 +1,66 @@
+[
+  {
+    "type": "message",
+    "user": "U0B04MS05HP",
+    "text": "Hey team, check out this link: pay-pail.com",
+    "ts": "1777057500.123456",
+    "client_msg_id": "abc-123-def",
+    "team": "T0AV2CN12DT"
+  },
+  {
+    "type": "message",
+    "user": "U0B04MS06XY",
+    "text": "Warning! This looks suspicious: pay-pail.com - possible phishing",
+    "ts": "1777057600.234567",
+    "client_msg_id": "def-456-ghi",
+    "team": "T0AV2CN12DT"
+  },
+  {
+    "type": "message",
+    "user": "U0B04MS05HP",
+    "text": "Someone sent me pay-pail.com in a DM, is this legit?",
+    "ts": "1777057700.345678",
+    "client_msg_id": "ghi-789-jkl",
+    "team": "T0AV2CN12DT"
+  },
+  {
+    "type": "message",
+    "user": "U0B04MS07AB",
+    "text": "Here's the agenda for today's standup: https://docs.google.com/document/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms",
+    "ts": "1777057800.456789",
+    "client_msg_id": "jkl-012-mno",
+    "team": "T0AV2CN12DT"
+  },
+  {
+    "type": "message",
+    "user": "U0B04MS08CD",
+    "text": "PR is up for review: https://github.com/lopkiloinm/eldershield/pull/12 — please take a look when you get a chance",
+    "ts": "1777057900.567890",
+    "client_msg_id": "mno-345-pqr",
+    "team": "T0AV2CN12DT"
+  },
+  {
+    "type": "message",
+    "user": "U0B04MS05HP",
+    "text": "Deployed to staging, health check passing: https://eldershield-staging.fly.dev/healthz",
+    "ts": "1777058000.678901",
+    "client_msg_id": "pqr-678-stu",
+    "team": "T0AV2CN12DT"
+  },
+  {
+    "type": "message",
+    "user": "U0B04MS09EF",
+    "text": "Redis docs for agent memory: https://redis.github.io/agent-memory-server/api/ — useful for the context engineering work",
+    "ts": "1777058100.789012",
+    "client_msg_id": "stu-901-vwx",
+    "team": "T0AV2CN12DT"
+  },
+  {
+    "type": "message",
+    "user": "U0B04MS06XY",
+    "text": "Reminder: team lunch at noon, calendar invite at https://calendar.google.com/calendar/r",
+    "ts": "1777058200.890123",
+    "client_msg_id": "vwx-234-yza",
+    "team": "T0AV2CN12DT"
+  }
+]

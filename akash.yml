@@ -1,0 +1,134 @@
+---
+# ElderShield – Akash Network Deployment
+# Deploy: akash tx deployment create akash.yml --from <wallet> --chain-id akashnet-2
+# Docs: https://docs.akash.network/deployments/akash-cli/deployment-create
+
+version: "2.0"
+
+services:
+  eldershield:
+    image: ghcr.io/lopkiloinm/eldershield:latest
+    env:
+      - DATABASE_URL=
+      - REDIS_URL=
+      - TINYFISH_API_KEY=
+      - NEXLA_SESSION_TOKEN=
+      - NEXLA_INBOX_NEXSET_ID=
+      - NEXLA_API_URL=https://dataops.nexla.io/nexla-api
+      - GITHUB_OWNER=lopkiloinm
+      - GITHUB_REPO=eldershield
+      - GITHUB_TOKEN=
+      - PAYMENT_TOKEN_SECRET=demo-token
+      - AGENT_MEMORY_URL=http://agent-memory:8000
+      - PORT=3000
+    expose:
+      - port: 3000
+        as: 80
+        to:
+          - global: true
+
+  # Redis Agent Memory Server — ElderShield's brain
+  agent-memory:
+    image: redis/agent-memory-server:latest
+    env:
+      - OPENAI_API_KEY=
+      - REDIS_URL=redis://redis:6379
+      - DISABLE_AUTH=true
+    expose:
+      - port: 8000
+        as: 8000
+        to:
+          - service: eldershield
+
+  # Redis — job queue + memory backend
+  redis:
+    image: redis:7-alpine
+    expose:
+      - port: 6379
+        as: 6379
+        to:
+          - service: eldershield
+          - service: agent-memory
+
+  # Autonomous worker cron — calls scan-next every 30s
+  worker-cron:
+    image: curlimages/curl:latest
+    command:
+      - sh
+      - -c
+      - |
+        while true; do
+          curl -s -X POST http://eldershield/api/worker/scan-next || true
+          sleep 30
+        done
+    depends_on:
+      - eldershield
+
+profiles:
+  compute:
+    eldershield:
+      resources:
+        cpu:
+          units: 0.5
+        memory:
+          size: 512Mi
+        storage:
+          size: 1Gi
+    agent-memory:
+      resources:
+        cpu:
+          units: 0.25
+        memory:
+          size: 256Mi
+        storage:
+          size: 512Mi
+    redis:
+      resources:
+        cpu:
+          units: 0.1
+        memory:
+          size: 128Mi
+        storage:
+          size: 512Mi
+    worker-cron:
+      resources:
+        cpu:
+          units: 0.05
+        memory:
+          size: 32Mi
+        storage:
+          size: 64Mi
+
+  placement:
+    dcloud:
+      pricing:
+        eldershield:
+          denom: uakt
+          amount: 1000
+        agent-memory:
+          denom: uakt
+          amount: 500
+        redis:
+          denom: uakt
+          amount: 200
+        worker-cron:
+          denom: uakt
+          amount: 100
+
+deployment:
+  eldershield:
+    dcloud:
+      profile: eldershield
+      count: 1
+  agent-memory:
+    dcloud:
+      profile: agent-memory
+      count: 1
+  redis:
+    dcloud:
+      profile: redis
+      count: 1
+  worker-cron:
+    dcloud:
+      profile: worker-cron
+      count: 1

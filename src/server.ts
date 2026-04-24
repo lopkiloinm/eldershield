@@ -22,6 +22,10 @@ import { scanRouter } from "./routes/scan";
 import { workerRouter } from "./routes/worker";
 import { voiceRouter } from "./routes/voice";
 import { metaRouter } from "./routes/meta";
+import { vapiRouter } from "./routes/vapi";
+import { wunderRouter } from "./routes/wundergraph";
+import { startAutonomousWorker } from "./autonomousWorker";
+import { registerWithSenso } from "./sensoClient";
 
 const app = express();
 
@@ -55,6 +59,8 @@ app.use("/api", scanRouter);
 app.use("/api/worker", workerRouter);
 app.use("/api/voice", voiceRouter);
 app.use("/api", metaRouter);
+app.use("/api/vapi", vapiRouter);
+app.use("/api/wg", wunderRouter);
 
 // ─── 404 handler ─────────────────────────────────────────────────────────────
 
@@ -76,6 +82,14 @@ app.listen(config.port, () => {
   console.log(`[server] ElderShield listening on port ${config.port}`);
   console.log(`[server] Ghost DB: ${config.databaseUrl.replace(/:[^:@]+@/, ":***@")}`);
   console.log(`[server] Redis: ${config.redisUrl || `${config.redisHost}:${config.redisPort}`}`);
+
+  // Start autonomous worker loop if enabled (set AUTONOMOUS_MODE=true)
+  if (process.env["AUTONOMOUS_MODE"] === "true") {
+    startAutonomousWorker();
+  }
+
+  // Register cited.md with Senso on startup
+  registerWithSenso().catch(() => {});
 });
 
 export default app;
