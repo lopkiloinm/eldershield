@@ -1,0 +1,123 @@
+{
+  "name": "eldershield",
+  "version": "1.0.0",
+  "description": "Autonomous scam-protection agent for older adults. Scans URLs and inbox messages for scams, publishes results to cited.md, and enforces x402 payment rails.",
+  "entry": "SKILL.md",
+  "author": "ElderShield Team",
+  "license": "MIT",
+  "keywords": [
+    "scam-detection",
+    "elder-safety",
+    "autonomous-agent",
+    "url-scanning",
+    "inbox-monitoring",
+    "x402",
+    "tinyfish",
+    "nexla",
+    "ghost-db"
+  ],
+  "operations": [
+    {
+      "id": "eldershield.scan_url",
+      "name": "Scan URL",
+      "description": "Scan a single URL and optional message text for scam indicators",
+      "http": {
+        "method": "POST",
+        "path": "/api/scan-url"
+      },
+      "input": {
+        "url": { "type": "string", "required": true },
+        "messageText": { "type": "string", "required": false },
+        "householdId": { "type": "string", "required": false }
+      },
+      "output": {
+        "jobId": { "type": "string" },
+        "householdId": { "type": "string" }
+      }
+    },
+    {
+      "id": "eldershield.get_result",
+      "name": "Get Scan Result",
+      "description": "Retrieve the result of a previously enqueued scan by jobId",
+      "http": {
+        "method": "GET",
+        "path": "/api/scan-result/:jobId"
+      },
+      "output": {
+        "jobId": { "type": "string" },
+        "url": { "type": "string" },
+        "risk": { "type": "string", "enum": ["SAFE", "SUSPICIOUS", "SCAM"] },
+        "explanation": { "type": "string" },
+        "createdAt": { "type": "string" }
+      }
+    },
+    {
+      "id": "eldershield.inbox_sweep",
+      "name": "Inbox Sweep",
+      "description": "Autonomously sweep the Nexla inbox Nexset for URLs to scan. Requires X-Payment-Token header (x402).",
+      "http": {
+        "method": "POST",
+        "path": "/api/inbox-sweep"
+      },
+      "headers": {
+        "X-Payment-Token": { "type": "string", "required": true, "description": "x402 payment token" }
+      },
+      "input": {
+        "householdId": { "type": "string", "required": false }
+      },
+      "output": {
+        "enqueued": { "type": "number" },
+        "householdId": { "type": "string" }
+      }
+    },
+    {
+      "id": "eldershield.voice_scan",
+      "name": "Voice Scan",
+      "description": "Voice-friendly endpoint. Accepts a spoken transcript and enqueues URL scans.",
+      "http": {
+        "method": "POST",
+        "path": "/api/voice/scan-message"
+      },
+      "input": {
+        "transcript": { "type": "string", "required": true },
+        "householdId": { "type": "string", "required": false }
+      },
+      "output": {
+        "jobIds": { "type": "array", "items": { "type": "string" } },
+        "message": { "type": "string", "description": "Spoken-friendly response" },
+        "urlsFound": { "type": "number" }
+      }
+    },
+    {
+      "id": "eldershield.process_next",
+      "name": "Process Next Job",
+      "description": "Worker endpoint: pop and process one queued scan job",
+      "http": {
+        "method": "POST",
+        "path": "/api/worker/scan-next"
+      },
+      "output": {
+        "jobId": { "type": "string" },
+        "risk": { "type": "string" },
+        "explanation": { "type": "string" }
+      }
+    }
+  ],
+  "tools": [
+    { "name": "Ghost.build", "role": "Agent-native Postgres database" },
+    { "name": "TinyFish", "role": "Remote browser agent for live URL analysis" },
+    { "name": "Nexla", "role": "Inbox Nexset via Tools API" },
+    { "name": "Redis/BullMQ", "role": "Real-time job queue" },
+    { "name": "GitHub", "role": "cited.md publishing" },
+    { "name": "x402", "role": "HTTP 402 payment rails" }
+  ],
+  "deployment": {
+    "type": "http-service",
+    "port": 3000,
+    "healthCheck": "/healthz",
+    "docker": {
+      "baseImage": "cgr.dev/chainguard/node:latest",
+      "note": "Chainguard hardened Node image for production deployments"
+    }
+  }
+}
