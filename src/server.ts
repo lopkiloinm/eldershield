@@ -21,6 +21,7 @@ import { redisConnection } from "./redis";
 import { scanRouter } from "./routes/scan";
 import { workerRouter } from "./routes/worker";
 import { voiceRouter } from "./routes/voice";
+import { metaRouter } from "./routes/meta";
 
 const app = express();
 
@@ -53,6 +54,7 @@ app.get("/healthz", async (_req, res) => {
 app.use("/api", scanRouter);
 app.use("/api/worker", workerRouter);
 app.use("/api/voice", voiceRouter);
+app.use("/api", metaRouter);
 
 // ─── 404 handler ─────────────────────────────────────────────────────────────
 

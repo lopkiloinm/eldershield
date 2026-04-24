@@ -7,26 +7,42 @@ export interface FeedEntry {
   risk: RiskLevel;
   explanation: string;
   createdAt: string;
+  householdId?: string;
   memoryContextUsed?: boolean;
   source?: "scan" | "inbox" | "voice";
 }
 
-interface Props { entries: FeedEntry[] }
+interface Props {
+  entries: FeedEntry[];
+  onClear: () => void;
+}
 
 const sourceLabel: Record<string, string> = {
   scan: "URL Scan", inbox: "Inbox Sweep", voice: "Voice",
 };
 
-export function ResultsFeed({ entries }: Props) {
+export function ResultsFeed({ entries, onClear }: Props) {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">
           Live Results
         </h2>
-        {entries.length > 0 && (
-          <span className="text-xs text-slate-500">{entries.length} scan{entries.length !== 1 ? "s" : ""}</span>
-        )}
+        <div className="flex items-center gap-3">
+          {entries.length > 0 && (
+            <span className="text-xs text-slate-500">
+              {entries.length} scan{entries.length !== 1 ? "s" : ""}
+            </span>
+          )}
+          {entries.length > 0 && (
+            <button
+              onClick={onClear}
+              className="text-xs text-slate-600 hover:text-slate-400 transition-colors"
+            >
+              Clear
+            </button>
+          )}
+        </div>
       </div>
 
       {entries.length === 0 ? (
@@ -64,9 +80,16 @@ function ResultCard({ entry }: { entry: FeedEntry }) {
           <span className="text-sm font-medium text-white truncate" title={entry.url}>
             {domain}
           </span>
-          <span className="text-xs text-slate-500 truncate" title={entry.url}>
+          <a
+            href={entry.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-slate-500 hover:text-sky-400 truncate transition-colors"
+            title={entry.url}
+            onClick={(e) => e.stopPropagation()}
+          >
             {entry.url}
-          </span>
+          </a>
         </div>
         <RiskBadge risk={entry.risk} />
       </div>
@@ -78,17 +101,23 @@ function ResultCard({ entry }: { entry: FeedEntry }) {
 
       {/* Footer */}
       <div className="flex items-center justify-between text-xs text-slate-600 pt-1 border-t border-slate-800">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           {entry.source && (
             <span className="bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded text-[10px]">
               {sourceLabel[entry.source] ?? entry.source}
             </span>
           )}
           {entry.memoryContextUsed && (
-            <span className="bg-sky-900/50 text-sky-400 px-1.5 py-0.5 rounded text-[10px]" title="Redis Agent Memory recalled past patterns">
+            <span
+              className="bg-sky-900/50 text-sky-400 px-1.5 py-0.5 rounded text-[10px]"
+              title="Redis Agent Memory recalled past patterns"
+            >
               🧠 memory
             </span>
           )}
+          <span className="font-mono text-[10px] text-slate-700" title={entry.jobId}>
+            {entry.jobId.slice(0, 8)}
+          </span>
         </div>
         <span title={entry.createdAt}>
           {new Date(entry.createdAt).toLocaleTimeString()}

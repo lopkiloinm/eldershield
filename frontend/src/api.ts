@@ -46,6 +46,21 @@ export interface HealthResponse {
   version: string;
 }
 
+export interface QueueStats {
+  waiting: number;
+  active: number;
+  completed: number;
+  failed: number;
+}
+
+export interface RiskEventRow {
+  jobId: string;
+  url: string;
+  risk: RiskLevel;
+  explanation: string;
+  createdAt: string;
+}
+
 const BASE = "/api";
 
 async function post<T>(path: string, body: unknown, headers?: Record<string, string>): Promise<T> {
@@ -78,7 +93,8 @@ async function get<T>(path: string): Promise<T> {
 }
 
 export const api = {
-  health: () => fetch("/healthz").then((r) => r.json() as Promise<HealthResponse>),
+  health: () =>
+    fetch("/healthz").then((r) => r.json() as Promise<HealthResponse>),
 
   scanUrl: (url: string, messageText?: string, householdId?: string) =>
     post<ScanUrlResponse>("/scan-url", { url, messageText, householdId }),
@@ -96,4 +112,29 @@ export const api = {
 
   voiceScan: (transcript: string, householdId?: string) =>
     post<VoiceResponse>("/voice/scan-message", { transcript, householdId }),
+
+  // Queue depth — hits BullMQ via the backend
+  queueStats: () =>
+    get<QueueStats>("/queue/stats"),
+
+  // Recent scan history from Ghost DB
+  recentScans: (limit = 20) =>
+    get<RiskEventRow[]>(`/scans/recent?limit=${limit}`),
 };
+
+// ─── Poll a jobId until it resolves or times out ──────────────────────────────
+
+export async function pollResult(
+  jobId: string,
+  opts: { intervalMs?: number; timeoutMs?: number } = {}
+): Promise<ScanResult> {
+  const { intervalMs = 2000, timeoutMs = 90_000 } = opts;
+  const deadline = Date.now() + timeoutMs;
+
+  while (Date.now() < deadline) {
+    const r = await api.getResult(jobId);
+    if ("risk" in r) return r as ScanResult;
+    await new Promise((res) => setTimeout(res, intervalMs));
+  }
+  throw new Error(`Timed out waiting for job ${jobId}`);
+}
