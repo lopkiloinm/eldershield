@@ -1,15 +1,22 @@
 import { useEffect, useState } from "react";
 import { api, type QueueStats } from "../api";
 
-export function QueueBadge() {
+interface Props {
+  onStats?: (s: QueueStats) => void;
+}
+
+export function QueueBadge({ onStats }: Props) {
   const [stats, setStats] = useState<QueueStats | null>(null);
 
   useEffect(() => {
-    const fetch = () => api.queueStats().then(setStats).catch(() => {});
-    fetch();
-    const id = setInterval(fetch, 5000);
+    const load = () =>
+      api.queueStats()
+        .then((s) => { setStats(s); onStats?.(s); })
+        .catch(() => {});
+    load();
+    const id = setInterval(load, 5000);
     return () => clearInterval(id);
-  }, []);
+  }, [onStats]);
 
   if (!stats) return null;
 
@@ -23,10 +30,10 @@ export function QueueBadge() {
           {total} queued
         </span>
       ) : (
-        <span className="text-slate-600">queue empty</span>
+        <span className="text-slate-700 hidden sm:inline">queue empty</span>
       )}
       {stats.completed > 0 && (
-        <span className="text-slate-600">{stats.completed} done</span>
+        <span className="text-slate-600 hidden sm:inline">{stats.completed} done</span>
       )}
       {stats.failed > 0 && (
         <span className="text-red-500">{stats.failed} failed</span>
