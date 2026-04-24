@@ -45,16 +45,19 @@
     @apply hover:bg-white/[0.06] hover:border-white/[0.1] transition-all duration-200;
   }
   .card {
-    @apply bg-slate-900/80 border border-slate-800/80 rounded-2xl shadow-card;
+    @apply bg-slate-900/80 border border-slate-800/80 rounded-2xl;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.4);
   }
   .card-hover {
-    @apply hover:border-slate-700 hover:shadow-card-hover transition-all duration-200;
+    @apply hover:border-slate-700 transition-all duration-200;
+    &:hover { box-shadow: 0 8px 40px rgba(0,0,0,0.6); }
   }
   .btn-primary {
     @apply bg-gradient-to-r from-sky-600 to-sky-500 hover:from-sky-500 hover:to-sky-400
            text-white font-semibold rounded-xl transition-all duration-200
-           hover:shadow-glow-sky transform hover:-translate-y-0.5
-           disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none;
+           transform hover:-translate-y-0.5
+           disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0;
+    &:hover:not(:disabled) { box-shadow: 0 0 30px rgba(14,165,233,0.25); }
   }
   .btn-secondary {
     @apply bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-slate-600
